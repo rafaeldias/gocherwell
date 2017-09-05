@@ -40,9 +40,18 @@ func cherwellV1Server() *httptest.Server {
 		case "/token":
 			r.ParseForm()
 
-			if r.Form.Get("username") != USER || r.Form.Get("password") != PASS || r.Form.Get("client_id") != CLIENT_ID {
-				http.Error(w, `{"error":"invalid_grant","error_description":"BADREQUEST"}`, http.StatusBadRequest)
-				return
+			switch r.Form.Get("grant_type") {
+			case "password":
+
+				if r.Form.Get("username") != USER || r.Form.Get("password") != PASS || r.Form.Get("client_id") != CLIENT_ID {
+					http.Error(w, `{"error":"invalid_grant","error_description":"BADREQUEST"}`, http.StatusBadRequest)
+					return
+				}
+			case "refresh_token":
+				if r.Form.Get("client_id") != CLIENT_ID || r.Form.Get("refresh_token") != REFRESH_TOKEN {
+					http.Error(w, `{"error":"invalid_grant","error_description":"BADREQUEST"}`, http.StatusBadRequest)
+					return
+				}
 			}
 			w.Write([]byte(fmt.Sprintf(`{"access_token":"%s","token_type":"bearer","expires_in":1199,"refresh_token":"%s","as:client_id":"%s","username":"%s",".issued":"Mon, 04 Sep 2017 22:52:36 GMT",".expires":"Mon, 04 Sep 2017 23:12:36 GMT"}`, ACCESS_TOKEN, REFRESH_TOKEN, CLIENT_ID, USER)))
 		case "/api/V1/savebusinessobject":
@@ -84,14 +93,6 @@ func TestNewClient_WithValidHost_ReturnsValidObject(t *testing.T) {
 	}
 }
 
-func TestAuthenticate_InternalWithNotEnoughArgs_ReturnsError(t *testing.T) {
-	c := cherwell.NewClient(HOST)
-
-	if _, err := c.Authenticate(cherwell.AUTH_INTERNAL, CLIENT_ID); err == nil {
-		t.Fatalf("Expected err not to be nil, but got: %+v", err)
-	}
-}
-
 func TestAuthenticate_WithValidCredentials_ReturnsAccessToken(t *testing.T) {
 	s := cherwellV1Server()
 
@@ -101,6 +102,34 @@ func TestAuthenticate_WithValidCredentials_ReturnsAccessToken(t *testing.T) {
 
 	if res, _ := c.Authenticate(cherwell.AUTH_INTERNAL, CLIENT_ID, USER, PASS); res.AccessToken != ACCESS_TOKEN {
 		t.Fatalf("Expected AccessToken to be %s, but got: %s", ACCESS_TOKEN, res.AccessToken)
+	}
+}
+
+func TestAuthenticate_RefreshTokenWithValidCredentials_ReturnsNewAccessToken(t *testing.T) {
+	s := cherwellV1Server()
+
+	defer s.Close()
+
+	c := cherwell.NewClient(s.URL)
+
+	if res, _ := c.Authenticate(cherwell.REFRESH_TOKEN, CLIENT_ID, REFRESH_TOKEN); res.AccessToken != ACCESS_TOKEN {
+		t.Fatalf("Expected AccessToken to be %s, but got: %s", ACCESS_TOKEN, res.AccessToken)
+	}
+}
+
+func TestAuthenticate_InternalWithNotEnoughArgs_ReturnsError(t *testing.T) {
+	c := cherwell.NewClient(HOST)
+
+	if _, err := c.Authenticate(cherwell.AUTH_INTERNAL, CLIENT_ID); err == nil {
+		t.Fatalf("Expected err not to be nil, but got: %+v", err)
+	}
+}
+
+func TestAuthenticate_RefreshTokenWithNotEnoughArgs_ReturnsError(t *testing.T) {
+	c := cherwell.NewClient(HOST)
+
+	if _, err := c.Authenticate(cherwell.REFRESH_TOKEN, CLIENT_ID); err == nil {
+		t.Fatalf("Expected err not to be nil, but got: %+v", err)
 	}
 }
 
