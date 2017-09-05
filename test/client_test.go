@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	cherwell "gitlab-devops.totvs.com.br/engmon/cherwell/client"
+	cherwell "github.com/rafaeldias/cherwell/client"
 )
 
 const (
@@ -41,8 +41,7 @@ func cherwellV1Server() *httptest.Server {
 			r.ParseForm()
 
 			if r.Form.Get("username") != USER || r.Form.Get("password") != PASS || r.Form.Get("client_id") != CLIENT_ID {
-				w.WriteHeader(http.StatusBadRequest)
-				w.Write([]byte(`{"error":"invalid_grant","error_description":"BADREQUEST"}`))
+				http.Error(w, `{"error":"invalid_grant","error_description":"BADREQUEST"}`, http.StatusBadRequest)
 				return
 			}
 			w.Write([]byte(fmt.Sprintf(`{"access_token":"%s","token_type":"bearer","expires_in":1199,"refresh_token":"%s","as:client_id":"%s","username":"%s",".issued":"Mon, 04 Sep 2017 22:52:36 GMT",".expires":"Mon, 04 Sep 2017 23:12:36 GMT"}`, ACCESS_TOKEN, REFRESH_TOKEN, CLIENT_ID, USER)))
