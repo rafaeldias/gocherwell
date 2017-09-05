@@ -7,3 +7,7 @@ This is a Go package for requesting the Cherwell API. See `test` folder for exam
 ```
 $ go test test/client_test.go -v
 ```
+
+## License
+
+Distributed under MIT License. See LICENSE file for more details.
