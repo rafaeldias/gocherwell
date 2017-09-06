@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"time"
@@ -24,10 +23,10 @@ type CherwellClient struct {
 }
 
 type AuthResponse struct {
-	AccessToken  string    `json:"access_token"`
-	TokenType    string    `json:"token_typoe"`
-	ExpiresIn    time.Time `json:"expires_in"`
-	RefreshToken string    `json:"refresh_token"`
+	AccessToken  string        `json:"access_token"`
+	TokenType    string        `json:"token_typoe"`
+	ExpiresIn    time.Duration `json:"expires_in"`
+	RefreshToken string        `json:"refresh_token"`
 }
 
 type BusinessObject struct {
@@ -90,14 +89,9 @@ func (c *CherwellClient) Authenticate(tp string, args ...string) (AuthResponse, 
 	if err != nil {
 		return authRes, err
 	}
-	defer resp.Body.Close()
 
-	if body, err := ioutil.ReadAll(resp.Body); err != nil {
+	if err := unmarshalBody(resp, &authRes); err != nil {
 		return authRes, err
-	} else if resp.StatusCode == http.StatusOK {
-		json.Unmarshal(body, &authRes)
-	} else {
-		return authRes, Error{resp.StatusCode, string(body)}
 	}
 
 	c.token = authRes.AccessToken
@@ -139,16 +133,8 @@ func (c *CherwellClient) requestAPI(endpoint, method string, payload, output int
 		return err
 	}
 
-	defer resp.Body.Close()
-
-	if body, err := ioutil.ReadAll(resp.Body); err != nil {
+	if err := unmarshalBody(resp, output); err != nil {
 		return err
-	} else if resp.StatusCode == http.StatusOK {
-		if err := json.Unmarshal(body, output); err != nil {
-			return err
-		}
-	} else {
-		return Error{resp.StatusCode, string(body)}
 	}
 
 	return nil

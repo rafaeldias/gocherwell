@@ -8,26 +8,26 @@ import (
 	"strings"
 	"testing"
 
-	cherwell "github.com/rafaeldias/cherwell/client"
+	cherwell "github.com/rafaeldias/gocherwell/client"
 )
 
 const (
 	HOST          = "http://127.0.0.1"
-	CLIENT_ID     = "0aa6e1b5-2280-4764-8d0c-d1922fc34180"
+	CLIENT_ID     = "{client_id}"
 	USER          = "test_usr"
 	PASS          = "test_usr"
-	ACCESS_TOKEN  = "T2W0540_k99H78p1ibmX7eHaxLALX38DXWtCMf1brFypCvbc77KyOfKBPoVykw5F2CGVbuPk-F0QvtBwzLx8z-dcaRqoaM0L5qqBgH_NaMzL7DLL3ILmnEdlwfm4RRXNjnbwrgdz06vSMbUZ2ODcufOgipWhZpFCpaOCK4lQL11Oyj-2vCQhUNkTAdtBGReyxRdICFWDXiX4NVA08hfOd7VMGrWVOhtzFXhBRGFAWF4WwW4kLsWo_pK5b7sX_BqLGyLIm4w5Se2maY_eFhAaZZq39RivOhAYN8uLA6UzAE-LkOvHAjOWbP_W4gJLpnEdv42BXj0_jCZBCRmpXuHxmHSHlG3UhI3ZsgZa9ZrtTVCbUpNFe88PgZYYq0XzZ8nt2XxhzRCVhQE5bwZw5QM-LU86M4S6Pr99QZt2-64irmMq6lfJxcj13rbJH1xxfabMHRE1xLkBZAkNMpJlCnMw3sR57f9tJzHUKymbPL9WhLmu0FUzMPFjOg-SZhlQpmU9Ojmtym3btf0yOkfxLiR6gaRLYFHX1eDzrimy7NlCt2E"
-	REFRESH_TOKEN = "423b345af13945afbe331169db8d0cd2"
+	ACCESS_TOKEN  = "{access_token}"
+	REFRESH_TOKEN = "{refresh_token}"
 )
 
 func validPayload() cherwell.BusinessObject {
 	return cherwell.BusinessObject{
-		BusObID: "939ede4e7c0b06d3f7dbd248fc9edb20330dfc397c",
+		BusObID: "{busObjID}",
 		Fields: []cherwell.BusinessObjectFields{
 			cherwell.BusinessObjectFields{
-				FieldID: "BO:939ede4e7c0b06d3f7dbd248fc9edb20330dfc397c,FI:939ede4f6a8e2735a0242e4c1aae97c9b295ba30b9",
-				Name:    "Message",
-				Value:   "Coloque aqui o e-mail",
+				FieldID: "{field_id}",
+				Name:    "Name",
+				Value:   "Value",
 				Dirty:   true,
 			},
 		},
@@ -161,7 +161,6 @@ func TestAuthenticate_WithInvalidAuthGrant_ReturnsErrorCode400(t *testing.T) {
 	} else {
 		t.Fatalf("Expected err to be an instance of cherwell.Error, but got: %+v", err)
 	}
-
 }
 
 func TestSaveBusinessObject_WithValidPayloadAndToken_ReturnsSaveBusObjResponse(t *testing.T) {
