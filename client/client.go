@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"time"
 )
 
 const (
@@ -20,32 +19,6 @@ const (
 type CherwellClient struct {
 	host  string
 	token string
-}
-
-type AuthResponse struct {
-	AccessToken  string        `json:"access_token"`
-	TokenType    string        `json:"token_typoe"`
-	ExpiresIn    time.Duration `json:"expires_in"`
-	RefreshToken string        `json:"refresh_token"`
-}
-
-type BusinessObject struct {
-	BusObID       string                 `json:"busObId"`
-	BusObRecID    string                 `json:"busObRecId"`
-	BusObPublicID string                 `json:"busObPublicId"`
-	Fields        []BusinessObjectFields `json:"fields"`
-}
-
-type BusinessObjectFields struct {
-	FieldID string `json:"fieldId"`
-	Name    string `json:"name"`
-	Value   string `json:"value"`
-	Dirty   bool   `json:"dirty"`
-}
-
-type SaveBusObjResponse struct {
-	BusObPublicID string `json:"busObPublicId"`
-	BusObRecID    string `json:"busObRecId"`
 }
 
 func NewClient(host string) *CherwellClient {

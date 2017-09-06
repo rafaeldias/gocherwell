@@ -2,11 +2,12 @@ package text
 
 import (
 	"encoding/json"
-	"fmt"
+	_ "fmt"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	cherwell "github.com/rafaeldias/gocherwell/client"
 )
@@ -53,7 +54,21 @@ func cherwellV1Server() *httptest.Server {
 					return
 				}
 			}
-			w.Write([]byte(fmt.Sprintf(`{"access_token":"%s","token_type":"bearer","expires_in":1199,"refresh_token":"%s","as:client_id":"%s","username":"%s",".issued":"Mon, 04 Sep 2017 22:52:36 GMT",".expires":"Mon, 04 Sep 2017 23:12:36 GMT"}`, ACCESS_TOKEN, REFRESH_TOKEN, CLIENT_ID, USER)))
+
+			authRes := cherwell.AuthResponse{
+				AccessToken:  ACCESS_TOKEN,
+				TokenType:    "bearer",
+				ExpiresIn:    &cherwell.Duration{time.Duration(1199) * time.Second},
+				RefreshToken: REFRESH_TOKEN,
+			}
+
+			if res, err := json.Marshal(authRes); err != nil {
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				return
+			} else {
+				w.WriteHeader(http.StatusOK)
+				w.Write(res)
+			}
 		case "/api/V1/savebusinessobject":
 			var pieces = strings.Fields(r.Header.Get("Authorization"))
 
