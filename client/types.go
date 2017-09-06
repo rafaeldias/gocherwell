@@ -27,11 +27,6 @@ type BusinessObjectFields struct {
 	Dirty   bool   `json:"dirty"`
 }
 
-type SaveBusObjResponse struct {
-	BusObPublicID string `json:"busObPublicId"`
-	BusObRecID    string `json:"busObRecId"`
-}
-
 type Duration struct {
 	time.Duration
 }
@@ -49,4 +44,18 @@ func (d *Duration) UnmarshalJSON(b []byte) error {
 
 func (d *Duration) MarshalJSON() ([]byte, error) {
 	return []byte(strconv.Itoa(int(d.Duration / time.Second))), nil
+}
+
+type Error struct {
+	StatusCode int
+	Message    string
+}
+
+func (e Error) Error() string {
+	return strconv.Itoa(e.StatusCode) + " " + e.Message
+}
+
+type SaveBusObjResponse struct {
+	BusObPublicID string `json:"busObPublicId"`
+	BusObRecID    string `json:"busObRecId"`
 }
