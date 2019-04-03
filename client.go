@@ -68,7 +68,7 @@ func (c *CherwellClient) Authenticate(authType string, args ...string) (AuthResp
 		return authRes, err
 	}
 
-	if err := unmarshalBody(resp, &authRes); err != nil {
+	if err := parseRequest(resp, &authRes); err != nil {
 		return authRes, err
 	}
 
@@ -79,9 +79,7 @@ func (c *CherwellClient) Authenticate(authType string, args ...string) (AuthResp
 
 // SaveBusinessObject returns a SaveBusObjResponse or an error
 func (c *CherwellClient) SaveBusinessObject(bo BusinessObject) (SaveBusObjResponse, error) {
-	var (
-		saveBusRes SaveBusObjResponse
-	)
+	var saveBusRes SaveBusObjResponse
 
 	if err := c.requestAPI("/api/V1/savebusinessobject", http.MethodPost, bo, &saveBusRes); err != nil {
 		return saveBusRes, err
@@ -91,26 +89,26 @@ func (c *CherwellClient) SaveBusinessObject(bo BusinessObject) (SaveBusObjRespon
 }
 
 func (c *CherwellClient) requestAPI(endpoint, method string, payload, output interface{}) error {
-	var (
-		err  error
-		p    []byte
-		resp *http.Response
-	)
 
-	p, err = json.Marshal(payload)
+	b, err := json.Marshal(payload)
 	if err != nil {
 		return err
 	}
 
-	req, _ := http.NewRequest(method, c.host+endpoint, bytes.NewBuffer(p))
+	req, err := http.NewRequest(method, c.host+endpoint, bytes.NewBuffer(b))
+	if err != nil {
+		return err
+	}
+
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+c.token)
 
 	client := &http.Client{}
-	resp, err = client.Do(req)
+
+	resp, err := client.Do(req)
 	if err != nil {
 		return err
 	}
 
-	return unmarshalBody(resp, output)
+	return parseRequest(resp, output)
 }

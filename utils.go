@@ -6,18 +6,17 @@ import (
 	"net/http"
 )
 
-func unmarshalBody(resp *http.Response, output interface{}) error {
+func parseRequest(resp *http.Response, output interface{}) error {
 	defer resp.Body.Close()
 
-	if body, err := ioutil.ReadAll(resp.Body); err != nil {
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
 		return err
-	} else if resp.StatusCode == http.StatusOK {
-		if err := json.Unmarshal(body, output); err != nil {
-			return err
-		}
-	} else {
+	}
+
+	if resp.StatusCode != http.StatusOK {
 		return Error{resp.StatusCode, string(body)}
 	}
 
-	return nil
+	return json.Unmarshal(body, output)
 }
